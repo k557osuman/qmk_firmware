@@ -38,6 +38,7 @@ report_keyboard_t *keyboard_report = &(report_keyboard_t){};
 #ifdef NKRO_ENABLE
 report_nkro_t *nkro_report = &(report_nkro_t){};
 #endif
+static bool keyboard_report_dirty = false;
 
 extern inline void add_key(uint8_t key);
 extern inline void del_key(uint8_t key);
@@ -214,7 +215,7 @@ bool is_oneshot_layer_active(void) {
 
 /** \brief set oneshot
  *
- * FIXME: needs doc
+ * Flags the keyboard report to be sent at the soonest availability
  */
 void oneshot_set(bool active) {
     if (keymap_config.oneshot_enable != active) {
@@ -326,6 +327,18 @@ void send_keyboard_report(void) {
 #else
     send_6kro_report();
 #endif
+    keyboard_report_dirty = true;
+}
+
+/** \brief Send keyboard report immediate
+ *
+ * Checks if the keyboard report is different from the last one sent, and if so, sends the updated one
+ */
+void send_keyboard_report_immediate(void) {
+    if (keyboard_report_dirty) {
+        host_keyboard_send(keyboard_report);
+        keyboard_report_dirty = false;
+    }
 }
 
 /** \brief Get mods
