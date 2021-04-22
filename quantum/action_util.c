@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "host.h"
 #include "report.h"
 #include "debug.h"
+#include "wait.h"
 #include "action_util.h"
 #include "action_layer.h"
 #include "timer.h"
@@ -35,9 +36,21 @@ static uint8_t suppressed_mods    = 0;
 // TODO: pointer variable is not needed
 // report_keyboard_t keyboard_report = {};
 report_keyboard_t *keyboard_report = &(report_keyboard_t){};
+bool                           keyboard_report_has_deferred_keycodes;
+volatile unregister_keycodes_t unregister_keycodes;
 #ifdef NKRO_ENABLE
 report_nkro_t *nkro_report = &(report_nkro_t){};
 #endif
+#ifdef USB_6KRO_ENABLE
+#    define RO_ADD(a, b) ((a + b) % KEYBOARD_REPORT_KEYS)
+#    define RO_SUB(a, b) ((a - b + KEYBOARD_REPORT_KEYS) % KEYBOARD_REPORT_KEYS)
+#    define RO_INC(a) RO_ADD(a, 1)
+#    define RO_DEC(a) RO_SUB(a, 1)
+static int8_t cb_head  = 0;
+static int8_t cb_tail  = 0;
+static int8_t cb_count = 0;
+#endif
+
 
 extern inline void add_key(uint8_t key);
 extern inline void del_key(uint8_t key);
@@ -294,6 +307,10 @@ void send_6kro_report(void) {
         memcpy(&last_report, keyboard_report, sizeof(report_keyboard_t));
         host_keyboard_send(keyboard_report);
     }
+
+    keyboard_report_has_deferred_keycodes = true;
+#if !defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    send_keyboard_report_immediate();
 #endif
 }
 
@@ -321,6 +338,40 @@ void send_keyboard_report(void) {
         send_nkro_report();
     } else {
         send_6kro_report();
+        send_keyboard_report_deferred();
+        send_keyboard_report_immediate();
+    }
+}
+/** \brief Send keyboard report immediate
+ *
+ * Checks if the keyboard report is different from the last one sent, and if so, sends the updated one
+ */
+void send_keyboard_report_immediate(void) {
+    if (keyboard_report_has_deferred_keycodes) {
+        host_keyboard_send(&keyboard_report);
+        keyboard_report_has_deferred_keycodes = false;
+    }
+}
+
+/**
+ * @brief Send all unregister keycodes which have been recorded during keycode processing.
+ *
+ */
+void send_keyboard_report_buffered_unregister_keys(void) {
+    if (unregister_keycodes.len > 0) {
+        while (unregister_keycodes.len > 0) {
+            unregister_keycodes.len--;
+            unregister_code_deferred(unregister_keycodes.buffer[unregister_keycodes.len]);
+        }
+
+        if (unregister_keycodes.tap_delay != 0) {
+            wait_ms(unregister_keycodes.tap_delay);
+            unregister_keycodes.tap_delay = 0;
+        }
+
+        /* reset unregister_keycodes buffer. */
+        unregister_keycodes.len = 0;
+        send_keyboard_report_immediate();
     }
 #else
     send_6kro_report();

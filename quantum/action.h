@@ -31,7 +31,8 @@ extern "C" {
 #ifndef TAP_CODE_DELAY
 #    define TAP_CODE_DELAY 0
 #endif
-#ifndef TAP_HOLD_CAPS_DELAY
+
+#if !defined(TAP_HOLD_CAPS_DELAY)
 #    define TAP_HOLD_CAPS_DELAY 80
 #endif
 
@@ -72,7 +73,7 @@ extern bool disable_action_cache;
 
 /* Code for handling one-handed key modifiers. */
 #ifdef SWAP_HANDS_ENABLE
-extern bool                   swap_hands;
+extern bool           swap_hands;
 extern const keypos_t PROGMEM hand_swap_config[MATRIX_ROWS][MATRIX_COLS];
 #    if (MATRIX_COLS <= 8)
 typedef uint8_t swap_state_row_t;
@@ -113,6 +114,8 @@ void process_record_handler(keyrecord_t *record);
 void post_process_record_quantum(keyrecord_t *record);
 void process_action(keyrecord_t *record, action_t action);
 void register_code(uint8_t code);
+void unregister_code_deferred(uint8_t code);
+void unregister_code_buffered(uint8_t code, uint16_t delay);
 void unregister_code(uint8_t code);
 void tap_code(uint8_t code);
 void tap_code_delay(uint8_t code, uint16_t delay);

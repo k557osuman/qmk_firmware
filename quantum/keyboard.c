@@ -580,10 +580,10 @@ static bool matrix_task(void) {
         matrix_previous[row] = current_row;
     }
 
-        send_keyboard_report();
     return matrix_changed;
 }
 
+<<<<<<< HEAD
 /** \brief Tasks previously located in matrix_scan_quantum
  *
  * TODO: rationalise against keyboard_task and current split role
@@ -592,6 +592,10 @@ void quantum_task(void) {
 #ifdef SPLIT_KEYBOARD
     // some tasks should only run on master
     if (!is_keyboard_master()) return;
+
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    send_keyboard_report_immediate();
+    send_keyboard_report_buffered_unregister_keys();
 #endif
 
 #if defined(AUDIO_ENABLE) && defined(AUDIO_INIT_DELAY)
