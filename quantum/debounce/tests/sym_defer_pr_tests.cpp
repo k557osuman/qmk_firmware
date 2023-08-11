@@ -167,12 +167,12 @@ TEST_F(DebounceTest, TwoKeysSimultaneous2) {
         {0, {{0, 1, DOWN}}, {}},
         {1, {{0, 2, DOWN}}, {}},
 
-        {5, {}, {}},
         {6, {}, {{0, 1, DOWN}, {0, 2, DOWN}}},
-        {7, {{0, 1, UP}}, {}},
-        {8, {{0, 2, UP}}, {}},
+        {7, {{0, 2, UP}}, {}},
+        {9, {{0, 1, UP}}, {}},
 
-        {13, {}, {{0, 1, UP}, {0, 2, UP}}},
+        // Debouncing loses the specific ordering -- both events report simultaneously.
+        {14, {}, {{0, 1, UP}, {0, 2, UP}}},
     });
     runEvents();
 }
