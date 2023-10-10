@@ -20,6 +20,7 @@ DEBOUNCE milliseconds have elapsed since the last change.
 #include "debounce.h"
 #include "timer.h"
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef PROTOCOL_CHIBIOS
 #    if CH_CFG_USE_MEMCORE == FALSE
@@ -31,32 +32,15 @@ DEBOUNCE milliseconds have elapsed since the last change.
 #    define DEBOUNCE 5
 #endif
 
-// Maximum debounce: 255ms
-#if DEBOUNCE > UINT8_MAX
-#    undef DEBOUNCE
-#    define DEBOUNCE UINT8_MAX
-#endif
+static uint16_t last_time;
+// [row] milliseconds until key's state is considered debounced.
+static uint8_t countdowns[ROWS_PER_HAND];
+// [row]
+static matrix_row_t last_raw[ROWS_PER_HAND];
 
-typedef uint8_t debounce_counter_t;
-
-#if DEBOUNCE > 0
-
-#    define DEBOUNCE_ELAPSED 0
-
-static debounce_counter_t *debounce_counters;
-
-static matrix_row_t *last_raw;
-static fast_timer_t  last_time;
-static bool          counters_need_update;
-static bool          cooked_changed;
-
-static void update_debounce_counters_and_transfer_if_expired(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows, uint8_t elapsed_time);
-static void start_debounce_counters(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows);
-
-// we use num_rows rather than MATRIX_ROWS to support split keyboards
-void debounce_init(uint8_t num_rows) {
-    debounce_counters = (debounce_counter_t *)malloc(num_rows * sizeof(debounce_counter_t));
-    last_raw          = (matrix_row_t *)calloc(num_rows, sizeof(debounce_counter_t));
+void debounce_init(void) {
+    memset(countdowns, 0, sizeof(countdowns));
+    memset(last_raw, 0, sizeof(last_raw));
 
     debounce_counter_t *debounce_pointer = debounce_counters;
     for (uint8_t row = 0; row < num_rows; row++, debounce_pointer++) {
@@ -64,25 +48,31 @@ void debounce_init(uint8_t num_rows) {
     }
 }
 
-void debounce_free(void) {
-    free(debounce_counters);
-    debounce_counters = NULL;
-    free(last_raw);
-    last_raw = NULL;
-}
+void debounce_free(void) {}
 
-bool debounce(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows, bool changed) {
-    bool updated_last = false;
-    cooked_changed    = false;
+bool debounce(matrix_row_t raw[], matrix_row_t cooked[], bool changed) {
+    uint16_t now           = timer_read();
+    uint16_t elapsed16     = TIMER_DIFF_16(now, last_time);
+    last_time              = now;
+    uint8_t elapsed        = (elapsed16 > 255) ? 255 : elapsed16;
+    bool    cooked_changed = false;
 
     if (counters_need_update) {
         fast_timer_t now          = timer_read_fast();
         fast_timer_t elapsed_time = TIMER_DIFF_FAST(now, last_time);
 
-        last_time    = now;
-        updated_last = true;
-        if (elapsed_time > UINT8_MAX) {
-            elapsed_time = UINT8_MAX;
+    for (uint8_t row = 0; row < ROWS_PER_HAND; ++row, ++countdown) {
+        matrix_row_t raw_row = raw[row];
+
+        if (raw_row != last_raw[row]) {
+            *countdown    = DEBOUNCE;
+            last_raw[row] = raw_row;
+        } else if (*countdown > elapsed) {
+            *countdown -= elapsed;
+        } else if (*countdown) {
+            cooked_changed |= cooked[row] ^ raw_row;
+            cooked[row] = raw_row;
+            *countdown  = 0;
         }
 
         if (elapsed_time > 0) {

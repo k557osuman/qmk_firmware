@@ -32,9 +32,13 @@ static const pin_t row_pins[MATRIX_ROWS] = MATRIX_ROW_PINS;
 static const pin_t col_pins[MATRIX_COLS] = MATRIX_COL_PINS;
 #endif // MATRIX_COL_PINS
 
+<<<<<<< HEAD
 #define ROWS_PER_HAND (MATRIX_ROWS)
 
 static inline void gpio_atomic_write_pin_low(pin_t pin) {
+=======
+static inline void writePinLow_atomic(pin_t pin) {
+>>>>>>> 71998e41a7 (Allocation-free debouncing)
     ATOMIC_BLOCK_FORCEON {
         gpio_write_pin_low(pin);
     }
