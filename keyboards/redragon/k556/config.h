@@ -37,7 +37,7 @@
 #define MATRIX_ROW_PINS { C15, D11, D10, D9, D8, D7 }
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
-#define DEBOUNCE 10
+#define DEBOUNCE 5
 #define QMK_KEYS_PER_SCAN 12
 #define REGISTER_MULTIPLE_KEYEVENTS_ENABLE
 #define DEBUG_MATRIX_SCAN_RATE
