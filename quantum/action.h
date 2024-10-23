@@ -38,10 +38,11 @@ extern "C" {
 #    endif
 #endif
 
-#ifndef TAP_CODE_DELAY
+#if !defined(TAP_CODE_DELAY)
 #    define TAP_CODE_DELAY 0
 #endif
-#ifndef TAP_HOLD_CAPS_DELAY
+
+#if !defined(TAP_HOLD_CAPS_DELAY)
 #    define TAP_HOLD_CAPS_DELAY 80
 #endif
 
@@ -108,7 +109,10 @@ void process_record(keyrecord_t *record);
 void process_record_handler(keyrecord_t *record);
 void post_process_record_quantum(keyrecord_t *record);
 void process_action(keyrecord_t *record, action_t action);
+void register_code_deferred(uint8_t code);
 void register_code(uint8_t code);
+void unregister_code_deferred(uint8_t code);
+void unregister_code_buffered(uint8_t code, uint16_t delay);
 void unregister_code(uint8_t code);
 void tap_code(uint8_t code);
 void tap_code_delay(uint8_t code, uint16_t delay);

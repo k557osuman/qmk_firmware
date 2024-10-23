@@ -29,6 +29,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "wait.h"
 #include "keycode_config.h"
 
+/* private functions */
+static void register_code_P(uint8_t code, void send_report_f(void));
+static void unregister_code_P(uint8_t code, void send_report_f(void));
+
+extern volatile unregister_keycodes_t unregister_keycodes;
+
 #ifdef BACKLIGHT_ENABLE
 #    include "backlight.h"
 #endif
@@ -293,18 +299,18 @@ void process_action(keyrecord_t *record, action_t action) {
                     } else {
                         add_weak_mods(mods);
                     }
-                    send_keyboard_report();
+                    send_keyboard_report_deferred();
                 }
-                register_code(action.key.code);
+                register_code_deferred(action.key.code);
             } else {
-                unregister_code(action.key.code);
+                unregister_code_deferred(action.key.code);
                 if (mods) {
                     if (IS_MOD(action.key.code) || action.key.code == KC_NO) {
                         del_mods(mods);
                     } else {
                         del_weak_mods(mods);
                     }
-                    send_keyboard_report();
+                    send_keyboard_report_deferred();
                 }
             }
         } break;
@@ -419,12 +425,18 @@ void process_action(keyrecord_t *record, action_t action) {
                     } else {
                         if (tap_count > 0) {
                             dprint("MODS_TAP: Tap: unregister_code\n");
+<<<<<<< HEAD
                             if (action.layer_tap.code == KC_CAPS_LOCK) {
                                 wait_ms(TAP_HOLD_CAPS_DELAY);
                             } else {
                                 wait_ms(TAP_CODE_DELAY);
+=======
+                            uint16_t delay = TAP_CODE_DELAY;
+                            if (action.layer_tap.code == KC_CAPS) {
+                                delay = TAP_HOLD_CAPS_DELAY;
+>>>>>>> fork/register-multiple-keyevents-per-report
                             }
-                            unregister_code(action.key.code);
+                            unregister_code_buffered(action.key.code, delay);
                         } else {
                             dprint("MODS_TAP: No tap: add_mods\n");
                             unregister_mods(mods);
@@ -618,12 +630,18 @@ void process_action(keyrecord_t *record, action_t action) {
                     } else {
                         if (tap_count > 0) {
                             dprint("KEYMAP_TAP_KEY: Tap: unregister_code\n");
+<<<<<<< HEAD
                             if (action.layer_tap.code == KC_CAPS_LOCK) {
                                 wait_ms(TAP_HOLD_CAPS_DELAY);
                             } else {
                                 wait_ms(TAP_CODE_DELAY);
+=======
+                            uint16_t delay = TAP_CODE_DELAY;
+                            if (action.layer_tap.code == KC_CAPS) {
+                                delay = TAP_HOLD_CAPS_DELAY;
+>>>>>>> fork/register-multiple-keyevents-per-report
                             }
-                            unregister_code(action.layer_tap.code);
+                            unregister_code_buffered(action.layer_tap.code, delay);
                         } else {
                             dprint("KEYMAP_TAP_KEY: No tap: Off on release\n");
                             layer_off(action.layer_tap.val);
@@ -698,10 +716,9 @@ void process_action(keyrecord_t *record, action_t action) {
                             swap_held  = false;
                         }
                         if (event.pressed) {
-                            register_code(action.swap.code);
+                            register_code_deferred(action.swap.code);
                         } else {
-                            wait_ms(TAP_CODE_DELAY);
-                            unregister_code(action.swap.code);
+                            unregister_code_buffered(action.swap.code, TAP_CODE_DELAY);
                             *record = (keyrecord_t){};  // hack: reset tap mode
                         }
                     } else {
@@ -790,11 +807,21 @@ void process_action(keyrecord_t *record, action_t action) {
 #endif
 }
 
+void register_code_deferred(uint8_t code) {
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    register_code_P(code, &send_keyboard_report_deferred);
+#else
+    register_code_P(code, &send_keyboard_report);
+#endif
+}
+
+void register_code(uint8_t code) { register_code_P(code, &send_keyboard_report); }
+
 /** \brief Utilities for actions. (FIXME: Needs better description)
  *
  * FIXME: Needs documentation.
  */
-void register_code(uint8_t code) {
+void register_code_P(uint8_t code, void send_report_f(void)) {
     if (code == KC_NO) {
         return;
     }
@@ -807,8 +834,13 @@ void register_code(uint8_t code) {
         add_key(KC_CAPS_LOCK);
         send_keyboard_report();
         wait_ms(100);
+<<<<<<< HEAD
         del_key(KC_CAPS_LOCK);
         send_keyboard_report();
+=======
+        del_key(KC_CAPSLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 
     else if (KC_LOCKING_NUM_LOCK == code) {
@@ -818,8 +850,13 @@ void register_code(uint8_t code) {
         add_key(KC_NUM_LOCK);
         send_keyboard_report();
         wait_ms(100);
+<<<<<<< HEAD
         del_key(KC_NUM_LOCK);
         send_keyboard_report();
+=======
+        del_key(KC_NUMLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 
     else if (KC_LOCKING_SCROLL_LOCK == code) {
@@ -829,8 +866,13 @@ void register_code(uint8_t code) {
         add_key(KC_SCROLL_LOCK);
         send_keyboard_report();
         wait_ms(100);
+<<<<<<< HEAD
         del_key(KC_SCROLL_LOCK);
         send_keyboard_report();
+=======
+        del_key(KC_SCROLLLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 #endif
 
@@ -846,14 +888,15 @@ void register_code(uint8_t code) {
             add_mods(oneshot_state.mods);
 
             add_key(code);
-            send_keyboard_report();
+            send_report_f();
 
             set_mods(tmp_mods);
-            send_keyboard_report();
+            send_report_f();
             oneshot_cancel();
         } else
 */
 #endif
+<<<<<<< HEAD
             {
                 // Force a new key press if the key is already pressed
                 // without this, keys with the same keycode, but different
@@ -865,11 +908,26 @@ void register_code(uint8_t code) {
                 add_key(code);
                 send_keyboard_report();
             }
+=======
+            // Force a new key press if the key is already pressed
+            // without this, keys with the same keycode, but different
+            // modifiers will be reported incorrectly, see issue #1708
+            if (is_key_pressed(&keyboard_report, code)) {
+                del_key(code);
+                send_keyboard_report();
+            }
+            add_key(code);
+            send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
         }
     else if
         IS_MOD(code) {
             add_mods(MOD_BIT(code));
+<<<<<<< HEAD
             send_keyboard_report();
+=======
+            send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
         }
 #ifdef EXTRAKEY_ENABLE
     else if
@@ -883,6 +941,40 @@ void register_code(uint8_t code) {
             mousekey_on(code);
             mousekey_send();
         }
+<<<<<<< HEAD
+=======
+#endif
+}
+
+void unregister_code_deferred(uint8_t code) {
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    unregister_code_P(code, &send_keyboard_report_deferred);
+#else
+    unregister_code_P(code, &send_keyboard_report);
+#endif
+}
+
+void unregister_code(uint8_t code) { unregister_code_P(code, &send_keyboard_report); }
+
+void unregister_code_buffered(uint8_t code, uint16_t delay) {
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    if (unregister_keycodes.len > UNREGISTER_KEYCODES_BUFFER_SIZE) {
+        dprintln("ERROR: couldn't add unregister keycode, buffer is full!");
+        return;
+    }
+    unregister_keycodes.buffer[unregister_keycodes.len] = code;
+    unregister_keycodes.len += 1;
+    if (unregister_keycodes.tap_delay < delay) {
+        unregister_keycodes.tap_delay = delay;
+    }
+#else
+
+    if (delay > 0) {
+        wait_ms(delay);
+    }
+
+    unregister_code_P(code, &send_keyboard_report);
+>>>>>>> fork/register-multiple-keyevents-per-report
 #endif
 }
 
@@ -890,7 +982,7 @@ void register_code(uint8_t code) {
  *
  * FIXME: Needs documentation.
  */
-void unregister_code(uint8_t code) {
+void unregister_code_P(uint8_t code, void send_report_f(void)) {
     if (code == KC_NO) {
         return;
     }
@@ -900,42 +992,71 @@ void unregister_code(uint8_t code) {
         // Resync: ignore if caps lock already is off
         if (!(host_keyboard_leds() & (1 << USB_LED_CAPS_LOCK))) return;
 #    endif
+<<<<<<< HEAD
         add_key(KC_CAPS_LOCK);
         send_keyboard_report();
         del_key(KC_CAPS_LOCK);
         send_keyboard_report();
+=======
+        add_key(KC_CAPSLOCK);
+        send_report_f();
+        del_key(KC_CAPSLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 
     else if (KC_LOCKING_NUM_LOCK == code) {
 #    ifdef LOCKING_RESYNC_ENABLE
         if (!(host_keyboard_leds() & (1 << USB_LED_NUM_LOCK))) return;
 #    endif
+<<<<<<< HEAD
         add_key(KC_NUM_LOCK);
         send_keyboard_report();
         del_key(KC_NUM_LOCK);
         send_keyboard_report();
+=======
+        add_key(KC_NUMLOCK);
+        send_report_f();
+        del_key(KC_NUMLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 
     else if (KC_LOCKING_SCROLL_LOCK == code) {
 #    ifdef LOCKING_RESYNC_ENABLE
         if (!(host_keyboard_leds() & (1 << USB_LED_SCROLL_LOCK))) return;
 #    endif
+<<<<<<< HEAD
         add_key(KC_SCROLL_LOCK);
         send_keyboard_report();
         del_key(KC_SCROLL_LOCK);
         send_keyboard_report();
+=======
+        add_key(KC_SCROLLLOCK);
+        send_report_f();
+        del_key(KC_SCROLLLOCK);
+        send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
     }
 #endif
 
     else if
         IS_KEY(code) {
             del_key(code);
+<<<<<<< HEAD
             send_keyboard_report();
+=======
+            send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
         }
     else if
         IS_MOD(code) {
             del_mods(MOD_BIT(code));
+<<<<<<< HEAD
             send_keyboard_report();
+=======
+            send_report_f();
+>>>>>>> fork/register-multiple-keyevents-per-report
         }
     else if
         IS_SYSTEM(code) { host_system_send(0); }
