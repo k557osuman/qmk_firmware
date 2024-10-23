@@ -33,11 +33,6 @@ static uint8_t weak_override_mods = 0;
 static uint8_t suppressed_mods    = 0;
 #endif
 
-<<<<<<< HEAD
-// TODO: pointer variable is not needed
-// report_keyboard_t keyboard_report = {};
-report_keyboard_t *keyboard_report = &(report_keyboard_t){};
-=======
 #ifdef USB_6KRO_ENABLE
 #    define RO_ADD(a, b) ((a + b) % KEYBOARD_REPORT_KEYS)
 #    define RO_SUB(a, b) ((a - b + KEYBOARD_REPORT_KEYS) % KEYBOARD_REPORT_KEYS)
@@ -51,7 +46,6 @@ static int8_t cb_count = 0;
 report_keyboard_t              keyboard_report;
 bool                           keyboard_report_has_deferred_keycodes;
 volatile unregister_keycodes_t unregister_keycodes;
->>>>>>> fork/register-multiple-keyevents-per-report
 
 extern inline void add_key(uint8_t key);
 extern inline void del_key(uint8_t key);
