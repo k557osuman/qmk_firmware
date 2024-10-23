@@ -38,9 +38,11 @@
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
 #define DEBOUNCE 10
-#define QMK_KEYS_PER_SCAN 8
+#define QMK_KEYS_PER_SCAN 12
 #define REGISTER_MULTIPLE_KEYEVENTS_ENABLE
 #define DEBUG_MATRIX_SCAN_RATE
+#define MATRIX_UNSELECT_DRIVE_HIGH
+#define MATRIX_IO_DELAY 1
 /* Enable NKRO - Up to 248 keys at the same time. */
 #define FORCE_NKRO
 

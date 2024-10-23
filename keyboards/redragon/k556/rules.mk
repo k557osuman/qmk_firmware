@@ -9,7 +9,7 @@ MCU = SN32F248BF
 #   comment out to disable the options.
 #
 REGISTER_MULTIPLE_KEYEVENTS_ENABLE = yes
-DEBOUNCE_TYPE = sym_eager_pr
+DEBOUNCE_TYPE = sym_eager_g
 LTO_ENABLE = no
 BACKLIGHT_ENABLE = no
 MAGIC_ENABLE = yes
