@@ -37,14 +37,21 @@
 #define MATRIX_ROW_PINS { C15, D11, D10, D9, D8, D7 }
 
 /* Debounce reduces chatter (unintended double-presses) - set 0 if debouncing is not needed */
-#define DEBOUNCE 5
-#define QMK_KEYS_PER_SCAN 12
+#define DEBOUNCE 2
+#define QMK_KEYS_PER_SCAN 8
+#define USB_POLLING_INTERVAL_MS 1
 #define REGISTER_MULTIPLE_KEYEVENTS_ENABLE
 #define DEBUG_MATRIX_SCAN_RATE
+
+/* Board and GPIO setup */
 #define MATRIX_UNSELECT_DRIVE_HIGH
-#define MATRIX_IO_DELAY 1
-/* Enable NKRO - Up to 248 keys at the same time. */
-#define FORCE_NKRO
+#define MATRIX_IO_DELAY 0
+#define GPIO_INPUT_PIN_DELAY 0
+#define MATRIX_HAS_GHOST
+#define SELECT_SOFT_SERIAL_SPEED 0
+
+/* RGB MODE FOR CONSISTENT 1000HZ SCANRATE */
+#define RGB_MATRIX_STARTUP_MODE RGB_MATRIX_SPLASH
 
 /* Mechanical locking support. Use KC_LCAP, KC_LNUM or KC_LSCR instead in keymap */
 //#define LOCKING_SUPPORT_ENABLE
@@ -91,7 +98,7 @@
 /* RGB Reactive Effects Toggle */
 #define RGB_MATRIX_FRAMEBUFFER_EFFECTS
 #define RGB_MATRIX_KEYPRESSES
-//#define RGB_MATRIX_KEYRELEASES
+#define RGB_MATRIX_KEYRELEASES
 
 /* RGB Reactive Effects */
 #define ENABLE_RGB_MATRIX_SOLID_REACTIVE_SIMPLE

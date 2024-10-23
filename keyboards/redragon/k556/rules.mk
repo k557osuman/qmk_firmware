@@ -9,7 +9,6 @@ MCU = SN32F248BF
 #   comment out to disable the options.
 #
 REGISTER_MULTIPLE_KEYEVENTS_ENABLE = yes
-DEBOUNCE_TYPE = sym_defer_g
 LTO_ENABLE = no
 BACKLIGHT_ENABLE = no
 MAGIC_ENABLE = yes
@@ -20,7 +19,7 @@ EXTRAKEY_ENABLE = yes   # Audio control and System control
 CONSOLE_ENABLE = yes     # Console for debug
 COMMAND_ENABLE = no     # Commands for debug and configuration
 SLEEP_LED_ENABLE = no   # Breathing sleep LED during USB suspend
-NKRO_ENABLE = yes       # USB Nkey Rollover
+NKRO_ENABLE = no       # USB Nkey Rollover
 AUDIO_ENABLE = no
 RGBLIGHT_ENABLE = no
 SERIAL_LINK_ENABLE = no

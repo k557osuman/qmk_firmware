@@ -13,10 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #pragma once
 
-#include_next <chconf.h>
+#define CH_CFG_OPTIMIZE_SPEED FALSE
+
+#define CH_CFG_USE_CONDVARS_TIMEOUT FALSE
 
 #undef CH_CFG_ST_TIMEDELTA
 #define CH_CFG_ST_TIMEDELTA 0
@@ -25,3 +26,4 @@
 #undef CH_CFG_ST_FREQUENCY
 #define CH_CFG_ST_FREQUENCY 10000
 
+#include_next <chconf.h>
