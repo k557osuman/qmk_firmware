@@ -17,6 +17,7 @@
 #pragma once
 
 #define MATRIX_UNSELECT_DRIVE_HIGH
+#define FORCE_NKRO
 
 /* key matrix size */
 #define RGB_MATRIX_LED_COUNT 106
