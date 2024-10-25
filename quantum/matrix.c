@@ -72,9 +72,9 @@ extern uint8_t thisHand, thatHand;
 #endif
 
 // user-defined overridable functions
-__attribute__((weak)) void matrix_init_pins(void);
+__attribute__((optimize(3))) void matrix_init_pins(void);
 __attribute__((weak)) void matrix_read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row);
-__attribute__((weak)) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col, matrix_row_t row_shifter);
+__attribute__((optimize(3))) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col, matrix_row_t row_shifter);
 
 static inline void gpio_atomic_set_pin_output_low(pin_t pin) {
     ATOMIC_BLOCK_FORCEON {
