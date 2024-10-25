@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sendchar.h"
 #include "eeconfig.h"
 #include "action_layer.h"
+#include "action_util.h"
 #ifdef BOOTMAGIC_ENABLE
 #    include "bootmagic.h"
 #endif
@@ -658,6 +659,7 @@ void quantum_task(void) {
 }
 
 /** \brief Main task that is repeatedly called as fast as possible. */
+int need_report;
 void keyboard_task(void) {
     __attribute__((unused)) bool activity_has_occurred = false;
     if (matrix_task()) {
@@ -666,6 +668,8 @@ void keyboard_task(void) {
     }
 
     quantum_task();
+
+    if (need_report) send_keyboard_report();
 
 #if defined(SPLIT_WATCHDOG_ENABLE)
     split_watchdog_task();
