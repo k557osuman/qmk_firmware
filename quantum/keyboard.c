@@ -528,6 +528,7 @@ static inline void generate_tick_event(void) {
  * @return true Matrix did change
  * @return false Matrix didn't change
  */
+int need_report;
 static bool matrix_task(void) {
     if (!matrix_can_read()) {
         generate_tick_event();
@@ -578,6 +579,11 @@ static bool matrix_task(void) {
         }
 
         matrix_previous[row] = current_row;
+    }
+
+
+    if (need_report) {
+        send_keyboard_report();
     }
 
     return matrix_changed;
@@ -667,9 +673,11 @@ void keyboard_task(void) {
         activity_has_occurred = true;
     }
 
-    quantum_task();
+    if (need_report) {
+        send_keyboard_report();
+    }
 
-    if (need_report) send_keyboard_report();
+    quantum_task();
 
 #if defined(SPLIT_WATCHDOG_ENABLE)
     split_watchdog_task();
