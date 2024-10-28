@@ -21,7 +21,7 @@
 #define FORCE_NKRO
 #define GPIO_INPUT_PIN_DELAY 0
 /*#define WAIT_US_TIMER GPTD2*/
-#define MATRIX_IO_DELAY 1
+#define MATRIX_IO_DELAY 0
 #define USB_POLLING_INTERVAL_MS 1
 #define SELECT_SOFT_SERIAL_SPEED 0
 /* key matrix size */
