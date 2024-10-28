@@ -665,18 +665,12 @@ void quantum_task(void) {
 }
 
 /** \brief Main task that is repeatedly called as fast as possible. */
-int need_report;
 void keyboard_task(void) {
     __attribute__((unused)) bool activity_has_occurred = false;
     if (matrix_task()) {
         last_matrix_activity_trigger();
         activity_has_occurred = true;
     }
-
-    if (need_report) {
-        send_keyboard_report();
-    }
-
     quantum_task();
 
 #if defined(SPLIT_WATCHDOG_ENABLE)

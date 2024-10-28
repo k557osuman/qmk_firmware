@@ -34,9 +34,7 @@ static uint8_t suppressed_mods    = 0;
 
 // TODO: pointer variable is not needed
 // report_keyboard_t keyboard_report = {};
-extern int need_report;
 report_keyboard_t *keyboard_report = &(report_keyboard_t){};
-int need_report = 0;
 #ifdef NKRO_ENABLE
 report_nkro_t *nkro_report = &(report_nkro_t){};
 #endif

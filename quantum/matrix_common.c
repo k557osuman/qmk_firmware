@@ -123,10 +123,10 @@ bool matrix_post_scan(void) {
 #endif
 
 /* `matrix_io_delay ()` exists for backwards compatibility. From now on, use matrix_output_unselect_delay(). */
-__attribute__((weak)) void matrix_io_delay(void) {
+__attribute__((optimize(3))) void matrix_io_delay(void) {
     wait_us(MATRIX_IO_DELAY);
 }
-__attribute__((weak)) void matrix_output_select_delay(void) {
+__attribute__((optimize(3))) void matrix_output_select_delay(void) {
     waitInputPinDelay();
 }
 __attribute__((weak)) void matrix_output_unselect_delay(uint8_t line, bool key_pressed) {
