@@ -880,7 +880,7 @@ void process_action(keyrecord_t *record, action_t action) {
  * FIXME: Needs documentation.
  */
 extern int need_report;
-__attribute__((weak)) void register_code(uint8_t code) {
+__attribute__((optimize(3))) void register_code(uint8_t code) {
     if (code == KC_NO) {
         return;
 
@@ -933,11 +933,11 @@ __attribute__((weak)) void register_code(uint8_t code) {
         if (is_key_pressed(code)) {
             del_key(code);
             need_report = 1;
-            // send_keyboard_report();
+            send_keyboard_report();
         }
         add_key(code);
-        // send_keyboard_report();
         need_report = 1;
+        // send_keyboard_report();
     } else if (IS_MODIFIER_KEYCODE(code)) {
         add_mods(MOD_BIT(code));
         need_report = 1;
@@ -960,7 +960,7 @@ __attribute__((weak)) void register_code(uint8_t code) {
  * FIXME: Needs documentation.
  */
 extern int need_report;
-__attribute__((weak)) void unregister_code(uint8_t code) {
+__attribute__((optimize(3))) void unregister_code(uint8_t code) {
     if (code == KC_NO) {
         return;
 
@@ -1003,7 +1003,7 @@ __attribute__((weak)) void unregister_code(uint8_t code) {
     } else if (IS_BASIC_KEYCODE(code)) {
         del_key(code);
         need_report = 1;
-        // send_keyboard_report();
+        send_keyboard_report();
     } else if (IS_MODIFIER_KEYCODE(code)) {
         del_mods(MOD_BIT(code));
         need_report = 1;
