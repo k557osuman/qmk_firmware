@@ -40,16 +40,12 @@ void debounce_init(uint8_t num_rows) {}
 bool debounce(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows, bool changed) {
     bool cooked_changed = false;
     matrix_need_update = false;
-    // if (!debouncing) {
-    //     debouncing = true;
-    // }
 
-    if (changed) {
-    matrix_need_update = false;
-    debouncing      = true;
+    if (changed || matrix_need_update) {
+    // debouncing      = true;
     debouncing_time = timer_read_fast();
 
-    if (debouncing) {
+    if (!debouncing) {
         for (uint8_t row = 0; row < num_rows; row++){
             size_t matrix_size = num_rows * sizeof(matrix_row_t);
             if (memcmp(cooked, raw, matrix_size) != 0){
@@ -59,7 +55,7 @@ bool debounce(matrix_row_t raw[], matrix_row_t cooked[], uint8_t num_rows, bool 
         }
     }
 
-    } else if (debouncing && timer_elapsed_fast(debouncing_time) > DEBOUNCE) {
+    } else if (debouncing && timer_elapsed_fast(debouncing_time) >= DEBOUNCE) {
         debouncing = false;
         matrix_need_update = true;
     }
