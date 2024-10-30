@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include "action_util.h"
 #include <string.h>
 #include "matrix.h"
 #include "rgb_matrix.h"
@@ -107,12 +107,11 @@ static const uint8_t underglow_leds[UNDERGLOW_LEDS] = UNDERGLOW_IDX;
 
 #if defined(SHARED_MATRIX)
 void matrix_output_unselect_delay(uint8_t line, bool key_pressed) {
-    for (int i = 0; i < TIME_US2I(MATRIX_IO_DELAY); ++i) {
-        __asm__ volatile("" ::: "memory");
-    }
+        __asm__ volatile("nop\nnop\nnop\n");
 }
 bool matrix_can_read(void) {
     return matrix_scanned;
+    send_keyboard_report();
 }
 #endif // SHARED_MATRIX
 
@@ -659,5 +658,6 @@ bool matrix_scan_custom(matrix_row_t current_matrix[]) {
     matrix_scanned = false;
 
     return changed;
+    send_keyboard_report();
 }
 #endif // SHARED_MATRIX

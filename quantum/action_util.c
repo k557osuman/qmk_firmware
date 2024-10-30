@@ -281,7 +281,6 @@ static uint8_t get_mods_for_report(void) {
 
     return mods;
 }
-extern int need_report;
 void send_6kro_report(void) {
     keyboard_report->mods = get_mods_for_report();
 
@@ -294,13 +293,11 @@ void send_6kro_report(void) {
     if (memcmp(keyboard_report, &last_report, sizeof(report_keyboard_t)) != 0) {
         memcpy(&last_report, keyboard_report, sizeof(report_keyboard_t));
         host_keyboard_send(keyboard_report);
-        need_report = 0;
     }
 #endif
 }
 
 #ifdef NKRO_ENABLE
-extern int need_report;
 void send_nkro_report(void) {
     nkro_report->mods = get_mods_for_report();
 
@@ -310,7 +307,6 @@ void send_nkro_report(void) {
     if (memcmp(nkro_report, &last_report, sizeof(report_nkro_t)) != 0) {
         memcpy(&last_report, nkro_report, sizeof(report_nkro_t));
         host_nkro_send(nkro_report);
-        need_report = 0;
     }
 }
 #endif
@@ -319,19 +315,15 @@ void send_nkro_report(void) {
  *
  * FIXME: needs doc
  */
-extern int need_report;
 void send_keyboard_report(void) {
 #ifdef NKRO_ENABLE
     if (keyboard_protocol && keymap_config.nkro) {
         send_nkro_report();
-        need_report = 0;
     } else {
         send_6kro_report();
-        need_report = 0;
     }
 #else
     send_6kro_report();
-    need_report = 0;
 #endif
 }
 

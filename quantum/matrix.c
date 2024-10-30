@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "util.h"
 #include "matrix.h"
 #include "debounce.h"
+#include "action_util.h"
 #include "atomic_util.h"
 
 #ifdef SPLIT_KEYBOARD
@@ -73,7 +74,7 @@ extern uint8_t thisHand, thatHand;
 
 // user-defined overridable functions
 __attribute__((optimize(3))) void matrix_init_pins(void);
-__attribute__((weak)) void matrix_read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row);
+__attribute__((optimize(3))) void matrix_read_cols_on_row(matrix_row_t current_matrix[], uint8_t current_row);
 __attribute__((optimize(3))) void matrix_read_rows_on_col(matrix_row_t current_matrix[], uint8_t current_col, matrix_row_t row_shifter);
 
 static inline void gpio_atomic_set_pin_output_low(pin_t pin) {
@@ -347,5 +348,6 @@ uint8_t matrix_scan(void) {
     matrix_scan_kb();
 #    endif
     return (uint8_t)changed;
+    send_keyboard_report();
 }
 #endif

@@ -879,7 +879,6 @@ void process_action(keyrecord_t *record, action_t action) {
  *
  * FIXME: Needs documentation.
  */
-extern int need_report;
 __attribute__((optimize(3))) void register_code(uint8_t code) {
     if (code == KC_NO) {
         return;
@@ -891,11 +890,9 @@ __attribute__((optimize(3))) void register_code(uint8_t code) {
         if (host_keyboard_led_state().caps_lock) return;
 #    endif
         add_key(KC_CAPS_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         wait_ms(TAP_HOLD_CAPS_DELAY);
         del_key(KC_CAPS_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 
     } else if (KC_LOCKING_NUM_LOCK == code) {
@@ -903,11 +900,9 @@ __attribute__((optimize(3))) void register_code(uint8_t code) {
         if (host_keyboard_led_state().num_lock) return;
 #    endif
         add_key(KC_NUM_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         wait_ms(100);
         del_key(KC_NUM_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 
     } else if (KC_LOCKING_SCROLL_LOCK == code) {
@@ -915,11 +910,9 @@ __attribute__((optimize(3))) void register_code(uint8_t code) {
         if (host_keyboard_led_state().scroll_lock) return;
 #    endif
         add_key(KC_SCROLL_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         wait_ms(100);
         del_key(KC_SCROLL_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 #endif
 
@@ -932,15 +925,12 @@ __attribute__((optimize(3))) void register_code(uint8_t code) {
         // modifiers will be reported incorrectly, see issue #1708
         if (is_key_pressed(code)) {
             del_key(code);
-            need_report = 1;
-            send_keyboard_report();
+            // send_keyboard_report();
         }
         add_key(code);
-        need_report = 1;
         // send_keyboard_report();
     } else if (IS_MODIFIER_KEYCODE(code)) {
         add_mods(MOD_BIT(code));
-        need_report = 1;
         // send_keyboard_report();
 
 #ifdef EXTRAKEY_ENABLE
@@ -959,7 +949,6 @@ __attribute__((optimize(3))) void register_code(uint8_t code) {
  *
  * FIXME: Needs documentation.
  */
-extern int need_report;
 __attribute__((optimize(3))) void unregister_code(uint8_t code) {
     if (code == KC_NO) {
         return;
@@ -971,10 +960,8 @@ __attribute__((optimize(3))) void unregister_code(uint8_t code) {
         if (!host_keyboard_led_state().caps_lock) return;
 #    endif
         add_key(KC_CAPS_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         del_key(KC_CAPS_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 
     } else if (KC_LOCKING_NUM_LOCK == code) {
@@ -982,10 +969,8 @@ __attribute__((optimize(3))) void unregister_code(uint8_t code) {
         if (!host_keyboard_led_state().num_lock) return;
 #    endif
         add_key(KC_NUM_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         del_key(KC_NUM_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 
     } else if (KC_LOCKING_SCROLL_LOCK == code) {
@@ -993,20 +978,16 @@ __attribute__((optimize(3))) void unregister_code(uint8_t code) {
         if (!host_keyboard_led_state().scroll_lock) return;
 #    endif
         add_key(KC_SCROLL_LOCK);
-        need_report = 1;
         // send_keyboard_report();
         del_key(KC_SCROLL_LOCK);
-        need_report = 1;
         // send_keyboard_report();
 #endif
 
     } else if (IS_BASIC_KEYCODE(code)) {
         del_key(code);
-        need_report = 1;
-        send_keyboard_report();
+        // send_keyboard_report();
     } else if (IS_MODIFIER_KEYCODE(code)) {
         del_mods(MOD_BIT(code));
-        need_report = 1;
         // send_keyboard_report();
 
 #ifdef EXTRAKEY_ENABLE
