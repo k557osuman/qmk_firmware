@@ -8,8 +8,6 @@
 #undef HAL_USE_PWM
 #define HAL_USE_PWM false
 /*#define SN32_PWM_CT16B1_IRQ_PRIORITY 1*/
-#undef HAL_USE_I2C
-#define HAL_USE_I2C true
 #undef HAL_USE_PAL
 #define HAL_USE_PAL true
 #define SN32_GPIOA_IRQ_PRIORITY 1

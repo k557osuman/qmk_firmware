@@ -42,21 +42,19 @@ bool debounce(matrix_row_t raw[], matrix_row_t cooked[], bool changed) {
     matrix_need_update = false;
 
     if (!debouncing){
-        matrix_need_update = false;
         for (uint8_t row = 0; row < ROWS_PER_HAND; row++){
             cooked[row] = raw[row];
             cooked_changed = true;
         }
-        debouncing = true;
     }
 
     if (changed) {
-    matrix_need_update = false;
-    debouncing_time = timer_read_fast();
+    matrix_need_update = true;
+    debouncing_time = timer_read();
+    debouncing = true;
 
-    } else if (debouncing && timer_elapsed_fast(debouncing_time) >= DEBOUNCE) {
+    } else if (debouncing && timer_elapsed(debouncing_time) >= DEBOUNCE) {
         debouncing = false;
-        matrix_need_update = true;
     }
 
     return cooked_changed;
