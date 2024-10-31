@@ -339,6 +339,5 @@ uint8_t matrix_scan(void) {
     matrix_scan_kb();
 #    endif
     return (uint8_t)changed;
-    send_keyboard_report();
 }
 #endif

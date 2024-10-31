@@ -580,7 +580,7 @@ static bool matrix_task(void) {
         matrix_previous[row] = current_row;
     }
 
-    send_keyboard_report();
+        send_keyboard_report();
     return matrix_changed;
 }
 
