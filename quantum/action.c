@@ -407,7 +407,7 @@ void process_action(keyrecord_t *record, action_t action) {
                     } else {
                         add_weak_mods(mods);
                     }
-                    send_keyboard_report();
+                    send_keyboard_report_deferred();
                 }
                 register_code_deferred(action.key.code);
             } else {
@@ -418,7 +418,7 @@ void process_action(keyrecord_t *record, action_t action) {
                     } else {
                         del_weak_mods(mods);
                     }
-                    send_keyboard_report();
+                    send_keyboard_report_deferred();
                 }
             }
         } break;
@@ -441,7 +441,7 @@ void process_action(keyrecord_t *record, action_t action) {
                                 } else {
                                     add_weak_mods(mods);
                                 }
-                                send_keyboard_report();
+                                send_keyboard_report_deferred();
                             }
                             register_code_deferred(action.key.code);
                         } else {
@@ -452,7 +452,7 @@ void process_action(keyrecord_t *record, action_t action) {
                                 } else {
                                     del_weak_mods(mods);
                                 }
-                                send_keyboard_report();
+                                send_keyboard_report_deferred();
                             }
                         }
                     } else {
@@ -881,13 +881,6 @@ void process_action(keyrecord_t *record, action_t action) {
 #endif
 }
 
-void register_code_deferred(uint8_t code) {
-#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    register_code_P(code, &send_keyboard_report);
-#endif
-}
-
-void register_code(uint8_t code) { register_code_P(code, &send_keyboard_report); }
 
 /** \brief Utilities for actions. (FIXME: Needs better description)
  *
@@ -941,7 +934,7 @@ __attribute__((optimize(3))) void register_code_P(uint8_t code, void send_report
         // modifiers will be reported incorrectly, see issue #1708
         if (is_key_pressed(code)) {
             del_key(code);
-            send_keyboard_report_immediate();
+            send_keyboard_report();
         }
         add_key(code);
         send_report_f();
@@ -961,35 +954,16 @@ __attribute__((optimize(3))) void register_code_P(uint8_t code, void send_report
     }
 }
 
-void unregister_code_deferred(uint8_t code) {
-#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    unregister_code_P(code, &send_keyboard_report);
-#endif
-}
 
-void unregister_code(uint8_t code) { unregister_code_P(code, &send_keyboard_report); }
-
-void unregister_code_buffered(uint8_t code, uint16_t delay) {
+void register_code_deferred(uint8_t code) {
 #if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    if (unregister_keycodes.len > UNREGISTER_KEYCODES_BUFFER_SIZE) {
-        dprintln("ERROR: couldn't add unregister keycode, buffer is full!");
-        return;
-    }
-    unregister_keycodes.buffer[unregister_keycodes.len] = code;
-    unregister_keycodes.len += 1;
-    if (unregister_keycodes.tap_delay < delay) {
-        unregister_keycodes.tap_delay = delay;
-    }
+    register_code_P(code, &send_keyboard_report_deferred);
 #else
-
-    if (delay > 0) {
-        wait_ms(delay);
-    }
-
-    unregister_code_P(code, &send_keyboard_report);
+    register_code_P(code, &send_keyboard_report);
 #endif
 }
 
+void register_code(uint8_t code) { register_code_P(code, &send_keyboard_report); }
 /** \brief Utilities for actions. (FIXME: Needs better description)
  *
  * FIXME: Needs documentation.
@@ -1054,6 +1028,37 @@ __attribute__((optimize(3))) void unregister_code_P(uint8_t code, void send_repo
 #endif
 }
 
+
+void unregister_code_deferred(uint8_t code) {
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    unregister_code_P(code, &send_keyboard_report_deferred);
+#else
+    unregister_code_P(code, &send_keyboard_report);
+#endif
+}
+
+void unregister_code(uint8_t code) { unregister_code_P(code, &send_keyboard_report); }
+
+void unregister_code_buffered(uint8_t code, uint16_t delay) {
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    if (unregister_keycodes.len > UNREGISTER_KEYCODES_BUFFER_SIZE) {
+        dprintln("ERROR: couldn't add unregister keycode, buffer is full!");
+        return;
+    }
+    unregister_keycodes.buffer[unregister_keycodes.len] = code;
+    unregister_keycodes.len += 1;
+    if (unregister_keycodes.tap_delay < delay) {
+        unregister_keycodes.tap_delay = delay;
+    }
+#else
+
+    if (delay > 0) {
+        wait_ms(delay);
+    }
+
+    unregister_code_P(code, &send_keyboard_report);
+#endif
+}
 /** \brief Tap a keycode with a delay.
  *
  * \param code The basic keycode to tap.

@@ -296,7 +296,6 @@ void send_6kro_report(void) {
     if (memcmp(keyboard_report, &last_report, sizeof(report_keyboard_t)) != 0) {
         memcpy(&last_report, keyboard_report, sizeof(report_keyboard_t));
         host_keyboard_send(keyboard_report);
-        keyboard_report_has_deferred_keycodes = true;
     }
 }
 #endif
@@ -315,6 +314,35 @@ void send_nkro_report(void) {
 }
 #endif
 
+void send_keyboard_report_deferred(void) {
+        keyboard_report->mods = real_mods;
+        keyboard_report->mods |= weak_mods;
+#ifndef NO_ACTION_ONESHOT
+        if (oneshot_mods){
+#   if (defined(ONESHOT_TIMEOUT) && (ONESHOT_TIMEOUT > 0))
+    if(has_oneshot_mods_timed_out()){
+    dprintf("Oneshot: timeout\n")
+    clear_oneshot_mods();
+        }
+#   endif
+    keyboard_report->mods |= oneshot_mods;
+    if (has_anykey()){
+        clear_oneshot_mods();
+            }
+        }
+#   endif
+
+#ifdef KEY_OVERRIDE_ENABLE
+    keyboard_report->mods &= ~suppressed_mods;
+    keyboard_report->mods |= weak_override_mods;
+#endif
+
+    keyboard_report_has_deferred_keycodes = true;
+#if !defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    send_keyboard_report_immediate();
+#endif
+}
+
 /** \brief Send keyboard report
  *
  * FIXME: needs doc
@@ -328,6 +356,8 @@ void send_keyboard_report(void) {
     }
 #else
     send_6kro_report();
+    send_keyboard_report_deferred();
+    send_keyboard_report_immediate();
 #endif
 }
 
