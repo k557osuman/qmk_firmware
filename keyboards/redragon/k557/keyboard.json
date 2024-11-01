@@ -21,12 +21,12 @@
         "extrakey": true,
         "mousekey": false,
         "nkro": false,
-        "rgb_matrix": false
+        "rgb_matrix": true
     },
 
-    "debounce": 13,
+    "debounce": 16,
     "build": {
-        "debounce_type": "sym_defer_g"
+        "debounce_type": "sym_eager_pr"
     },
     "diode_direction": "ROW2COL",
     "matrix_pins": {
@@ -43,16 +43,6 @@
 
     "rgb_matrix": {
         "animations": {
-            "band_val" : true,
-            "breathing" : true,
-            "cycle_left_right" : true,
-            "cycle_pinwheel" : true,
-            "cycle_spiral" : true,
-            "digital_rain" : true,
-            "gradient_left_right" : true,
-            "gradient_up_down" : true,
-            "raindrops" : true,
-            "solid_reactive_simple" : true,
             "splash" : true,
             "typing_heatmap" : true
         },

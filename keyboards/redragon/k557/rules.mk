@@ -1,5 +1,6 @@
 OPT = -Ofast
 SRC += ./keyboards/redragon/k557/debounce.c
 OPT_DEFS += -DNO_SUSPEND_POWER_DOWN
+# RING_BUFFERED_6KRO_REPORT_ENABLE = yes
 
 DEBOUNCE_TYPE = custom
