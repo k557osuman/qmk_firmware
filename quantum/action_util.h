@@ -26,32 +26,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern "C" {
 #endif
 
-extern report_keyboard_t *keyboard_report;
-extern bool                           keyboard_report_has_deferred_keycodes;
-extern volatile unregister_keycodes_t unregister_keycodes;
-#ifdef NKRO_ENABLE
-extern report_nkro_t *nkro_report;
-#endif
-
-#if !defined(QMK_KEYS_PER_SCAN) && defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-#    pragma message "REGISTER_MULTIPLE_KEYEVENTS_ENABLE needs QMK_KEYS_PER_SCAN defined to have any effect, setting default of 4."
-#    define QMK_KEYS_PER_SCAN 4
-#endif
-
-#if !defined(QMK_KEYS_PER_SCAN)
-#    define UNREGISTER_KEYCODES_BUFFER_SIZE 1
-#else
-#    define UNREGISTER_KEYCODES_BUFFER_SIZE QMK_KEYS_PER_SCAN * 2  // Should be plenty of space for any occasion
-#endif
-
 typedef struct {
     uint8_t  buffer[UNREGISTER_KEYCODES_BUFFER_SIZE];
     size_t   len;
     uint16_t tap_delay;
 } unregister_keycodes_t;
 
+extern report_keyboard_t *keyboard_report;
+extern bool                           keyboard_report_has_deferred_keycodes;
+extern volatile unregister_keycodes_t unregister_keycodes;
+
+#ifdef NKRO_ENABLE
+extern report_nkro_t *nkro_report;
+#endif
 
 void send_keyboard_report(void);
+void send_keyboard_report_deferred(void);
 void send_keyboard_report_immediate(void);
 void send_keyboard_report_buffered_unregister_keys(void);
 

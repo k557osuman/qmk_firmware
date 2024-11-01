@@ -36,21 +36,11 @@ static uint8_t suppressed_mods    = 0;
 // TODO: pointer variable is not needed
 // report_keyboard_t keyboard_report = {};
 report_keyboard_t *keyboard_report = &(report_keyboard_t){};
-bool                           keyboard_report_has_deferred_keycodes;
+bool keyboard_report_has_deferred_keycodes;
 volatile unregister_keycodes_t unregister_keycodes;
 #ifdef NKRO_ENABLE
 report_nkro_t *nkro_report = &(report_nkro_t){};
 #endif
-#ifdef USB_6KRO_ENABLE
-#    define RO_ADD(a, b) ((a + b) % KEYBOARD_REPORT_KEYS)
-#    define RO_SUB(a, b) ((a - b + KEYBOARD_REPORT_KEYS) % KEYBOARD_REPORT_KEYS)
-#    define RO_INC(a) RO_ADD(a, 1)
-#    define RO_DEC(a) RO_SUB(a, 1)
-static int8_t cb_head  = 0;
-static int8_t cb_tail  = 0;
-static int8_t cb_count = 0;
-#endif
-
 
 extern inline void add_key(uint8_t key);
 extern inline void del_key(uint8_t key);
@@ -306,13 +296,10 @@ void send_6kro_report(void) {
     if (memcmp(keyboard_report, &last_report, sizeof(report_keyboard_t)) != 0) {
         memcpy(&last_report, keyboard_report, sizeof(report_keyboard_t));
         host_keyboard_send(keyboard_report);
+        keyboard_report_has_deferred_keycodes = true;
     }
-
-    keyboard_report_has_deferred_keycodes = true;
-#if !defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    send_keyboard_report_immediate();
-#endif
 }
+#endif
 
 #ifdef NKRO_ENABLE
 void send_nkro_report(void) {
@@ -338,17 +325,19 @@ void send_keyboard_report(void) {
         send_nkro_report();
     } else {
         send_6kro_report();
-        send_keyboard_report_deferred();
-        send_keyboard_report_immediate();
     }
+#else
+    send_6kro_report();
+#endif
 }
+
 /** \brief Send keyboard report immediate
  *
  * Checks if the keyboard report is different from the last one sent, and if so, sends the updated one
  */
 void send_keyboard_report_immediate(void) {
     if (keyboard_report_has_deferred_keycodes) {
-        host_keyboard_send(&keyboard_report);
+        host_keyboard_send(keyboard_report);
         keyboard_report_has_deferred_keycodes = false;
     }
 }
@@ -373,9 +362,6 @@ void send_keyboard_report_buffered_unregister_keys(void) {
         unregister_keycodes.len = 0;
         send_keyboard_report_immediate();
     }
-#else
-    send_6kro_report();
-#endif
 }
 
 /** \brief Get mods

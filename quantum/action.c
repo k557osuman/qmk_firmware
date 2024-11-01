@@ -409,9 +409,9 @@ void process_action(keyrecord_t *record, action_t action) {
                     }
                     send_keyboard_report();
                 }
-                register_code(action.key.code);
+                register_code_deferred(action.key.code);
             } else {
-                unregister_code(action.key.code);
+                unregister_code_deferred(action.key.code);
                 if (mods) {
                     if (IS_MODIFIER_KEYCODE(action.key.code) || action.key.code == KC_NO) {
                         del_mods(mods);
@@ -443,9 +443,9 @@ void process_action(keyrecord_t *record, action_t action) {
                                 }
                                 send_keyboard_report();
                             }
-                            register_code(action.key.code);
+                            register_code_deferred(action.key.code);
                         } else {
-                            unregister_code(action.key.code);
+                            unregister_code_deferred(action.key.code);
                             if (mods) {
                                 if (IS_MODIFIER_KEYCODE(action.key.code) || action.key.code == KC_NO) {
                                     del_mods(mods);
@@ -517,7 +517,7 @@ void process_action(keyrecord_t *record, action_t action) {
 #    endif
                             {
                                 ac_dprintf("MODS_TAP: Tap: register_code\n");
-                                register_code(action.key.code);
+                                register_code_deferred(action.key.code);
                             }
                         } else {
                             ac_dprintf("MODS_TAP: No tap: add_mods\n");
@@ -531,7 +531,7 @@ void process_action(keyrecord_t *record, action_t action) {
                             } else {
                                 wait_ms(TAP_CODE_DELAY);
                             }
-                            unregister_code_buffered(action.key.code);
+                            unregister_code_deferred(action.key.code);
                         } else {
                             ac_dprintf("MODS_TAP: No tap: add_mods\n");
 #    if defined(RETRO_TAPPING) && defined(DUMMY_MOD_NEUTRALIZER_KEYCODE)
@@ -711,7 +711,7 @@ void process_action(keyrecord_t *record, action_t action) {
                             } else {
                                 wait_ms(TAP_CODE_DELAY);
                             }
-                            unregister_code_buffered(action.layer_tap.code);
+                            unregister_code_deferred(action.layer_tap.code);
                         } else {
                             ac_dprintf("KEYMAP_TAP_KEY: No tap: Off on release\n");
                             layer_off(action.layer_tap.val);
@@ -794,7 +794,7 @@ void process_action(keyrecord_t *record, action_t action) {
                             swap_held  = false;
                         }
                         if (event.pressed) {
-                            register_code(action.swap.code);
+                            register_code_deferred(action.swap.code);
                         } else {
                             wait_ms(TAP_CODE_DELAY);
                             unregister_code_buffered(action.swap.code);
@@ -883,8 +883,6 @@ void process_action(keyrecord_t *record, action_t action) {
 
 void register_code_deferred(uint8_t code) {
 #if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    register_code_P(code, &send_keyboard_report_deferred);
-#else
     register_code_P(code, &send_keyboard_report);
 #endif
 }
@@ -943,7 +941,7 @@ __attribute__((optimize(3))) void register_code_P(uint8_t code, void send_report
         // modifiers will be reported incorrectly, see issue #1708
         if (is_key_pressed(code)) {
             del_key(code);
-            send_keyboard_report();
+            send_keyboard_report_immediate();
         }
         add_key(code);
         send_report_f();
@@ -965,8 +963,6 @@ __attribute__((optimize(3))) void register_code_P(uint8_t code, void send_report
 
 void unregister_code_deferred(uint8_t code) {
 #if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
-    unregister_code_P(code, &send_keyboard_report_deferred);
-#else
     unregister_code_P(code, &send_keyboard_report);
 #endif
 }
@@ -1001,9 +997,9 @@ void unregister_code_buffered(uint8_t code, uint16_t delay) {
 __attribute__((optimize(3))) void unregister_code_P(uint8_t code, void send_report_f(void)) {
     if (code == KC_NO) {
         return;
-
+    }
 #ifdef LOCKING_SUPPORT_ENABLE
-    } else if (KC_LOCKING_CAPS_LOCK == code) {
+    else if (KC_LOCKING_CAPS_LOCK == code) {
 #    ifdef LOCKING_RESYNC_ENABLE
         // Resync: ignore if caps lock already is off
         if (!host_keyboard_led_state().caps_lock) return;
@@ -1014,7 +1010,7 @@ __attribute__((optimize(3))) void unregister_code_P(uint8_t code, void send_repo
         send_report_f();
     }
 
-    } else if (KC_LOCKING_NUM_LOCK == code) {
+    else if (KC_LOCKING_NUM_LOCK == code) {
 #    ifdef LOCKING_RESYNC_ENABLE
         if (!host_keyboard_led_state().num_lock) return;
 #    endif
@@ -1024,7 +1020,7 @@ __attribute__((optimize(3))) void unregister_code_P(uint8_t code, void send_repo
         send_report_f();
     }
 
-    } else if (KC_LOCKING_SCROLL_LOCK == code) {
+    else if (KC_LOCKING_SCROLL_LOCK == code) {
 #    ifdef LOCKING_RESYNC_ENABLE
         if (!host_keyboard_led_state().scroll_lock) return;
 #    endif
@@ -1032,24 +1028,28 @@ __attribute__((optimize(3))) void unregister_code_P(uint8_t code, void send_repo
         send_report_f();
         del_key(KC_SCROLL_LOCK);
         send_report_f();
-#endif
 
-    } else if (IS_BASIC_KEYCODE(code)) {
+    }
+#endif
+    else if (IS_BASIC_KEYCODE(code)) {
         del_key(code);
         send_report_f();
     } else if (IS_MODIFIER_KEYCODE(code)) {
         del_mods(MOD_BIT(code));
         send_report_f();
-
+    }
 #ifdef EXTRAKEY_ENABLE
-    } else if (IS_SYSTEM_KEYCODE(code)) {
-        host_system_send(0);
-    } else if (IS_CONSUMER_KEYCODE(code)) {
+    else if (IS_SYSTEM_KEYCODE(code)) {
+       host_system_send(0);
+    }
+    else if (IS_CONSUMER_KEYCODE(code)) {
         host_consumer_send(0);
+    }
 #endif
-
-    } else if (IS_MOUSE_KEYCODE(code)) {
+#ifdef MOUSEKEY_ENABLE
+    else if (IS_MOUSE_KEYCODE(code)) {
         register_mouse(code, false);
+
     }
 #endif
 }
