@@ -580,8 +580,6 @@ static bool matrix_task(void) {
         matrix_previous[row] = current_row;
     }
 
-    send_keyboard_report_immediate();
-    send_keyboard_report_buffered_unregister_keys();
     return matrix_changed;
 }
 
@@ -670,6 +668,10 @@ void keyboard_task(void) {
     }
     quantum_task();
 
+#if defined(REGISTER_MULTIPLE_KEYEVENTS_ENABLE)
+    send_keyboard_report_immediate();
+    send_keyboard_report_buffered_unregister_keys();
+#endif
 
 #if defined(SPLIT_WATCHDOG_ENABLE)
     split_watchdog_task();
