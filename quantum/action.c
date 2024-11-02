@@ -728,7 +728,7 @@ void process_action(keyrecord_t *record, action_t action) {
                         } else {
                             wait_ms(TAP_CODE_DELAY);
                         }
-                        unregister_code(action.layer_tap.code);
+                        unregister_code_deferred(action.layer_tap.code);
                     }
 #    endif
                     break;
@@ -934,7 +934,7 @@ __attribute__((optimize(3))) void register_code_P(uint8_t code, void send_report
         // modifiers will be reported incorrectly, see issue #1708
         if (is_key_pressed(code)) {
             del_key(code);
-            send_keyboard_report();
+            send_keyboard_report_deferred();
         }
         add_key(code);
         send_report_f();
